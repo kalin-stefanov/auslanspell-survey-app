@@ -17,6 +17,7 @@
       text-align: center;
       margin-bottom: 20px;
       color: #111;
+      font-size: 18px;
     }
     .video-frame {
       width: 80%;
@@ -43,10 +44,10 @@
       color: #111;
     }
     .option {
-      display: block;
-      margin: 8px auto;
+      display: inline-flex;
+      margin: 0 4px;
       padding: 10px 20px;
-      width: 250px;
+      min-width: 100px;
       background-color: #fff;
       border: 2px solid #ccc;
       border-radius: 8px;
@@ -54,6 +55,8 @@
       font-size: 16px;
       color: #111;
       transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+      justify-content: center;
+      align-items: center;
     }
     .option:hover {
       background-color: #f5f5f5;
@@ -64,7 +67,31 @@
       color: #fff;
       border-color: #111;
     }
+    .button-row {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+    #back-button, #final-back-button, #next-button, #start-survey-button, #end-button {
+      padding: 12px 44px;
+      background-color: #111;
+      color: #fff;
+      border: 1px solid #111;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    #back-button:hover, #final-back-button:hover, #next-button:hover, #start-survey-button:hover, #end-button:hover {
+      background: #fff;
+      color: #111;
+      border: 1px solid #111;
+    }
     #text-answer {
+      display: block;
       padding: 10px;
       width: 300px;
       font-size: 16px;
@@ -73,53 +100,67 @@
       background: #fff;
       color: #111;
     }
-    #next-button {
-      display: block;
-      margin: 30px auto 10px;
-      padding: 12px 44px;
-      background-color: #111;
-      color: #fff;
-      border: 1px solid #111;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-    }
-    #next-button:hover {
-      background: #fff;
-      color: #111;
-      border: 1px solid #111;
-    }
-    #start-survey-button {
-      display: block;
-      margin: 30px auto 10px;
-      padding: 12px 44px;
-      background-color: #111;
-      color: #fff;
-      border: 1px solid #111;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-    }
-    #start-survey-button:hover {
-      background: #fff;
-      color: #111;
-      border: 1px solid #111;
-    }
     .progress-bar-container {
       width: 80%;
       max-width: 800px;
       margin: 20px auto;
-      background-color: #eee;
       border-radius: 10px;
-      overflow: hidden;
+      position: relative;
+      height: 40px;
     }
-    .progress-bar {
-      height: 12px;
-      width: 0%;
+    .progress-bar-bg, .progress-bar-filled {
+      position: absolute;
+      top: 50%;
+      left: 6px;
+      right: 6px;
+      transform: translateY(-50%);
+      height: 3px;
+      border-radius: 10px;
+    }
+    .progress-bar-bg {
+      /* background-color: #eee; */
       background-color: #111;
-      transition: width 0.3s ease-in-out;
+      z-index: 1;
+    }
+    .progress-bar-filled {
+      background-color: #111;
+      z-index: 2;
+      transition: width 0.3s;
+    }
+    .progress-circles {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      width: 100%;
+      height: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 3;
+      pointer-events: none;
+      padding: 0 6px;
+    }
+    .progress-circle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid #111;
+      background: #fff;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      z-index: 4;
+    }
+    .progress-circle.answered {
+      background: #111;
+      border-color: #111;
+    }
+    .progress-circle.current {
+      box-shadow: 0 0 2px 2px #111;
     }
     #completion-message {
       text-align: center;
@@ -127,7 +168,7 @@
       font-size: 20px;
       color: #111;
     }
-    #user-info-container {
+    #user-info-container, #final-page {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -135,18 +176,34 @@
       min-height: 60vh;
       margin-bottom: 30px;
     }
+    #answer-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      min-height: 56px;
+    }
   </style>
 </head>
 <body>
   <div id="user-info-container">
+    <h2>Auslan Fingerspelling Survey</h2>
+    <p style="margin-bottom: 120px;">Instructions and explanantions.</p>
     <input type="text" id="user-name" placeholder="Name" style="margin:8px; padding:10px; width:220px; border-radius:5px; border:1px solid #ccc;">
-    <input type="email" id="user-email" placeholder="Email" style="margin:8px; padding:10px; width:220px; border-radius:5px; border:1px solid #ccc;">
+    <input type="email" id="user-email" placeholder="Email" style="margin:8px 0 24px 0; padding:10px; width:220px; border-radius:5px; border:1px solid #ccc;">
     <button id="start-survey-button">Start</button>
   </div>
 
+  <div id="final-page" style="display:none;">
+    <h2 id="final-heading">Survey Complete</h2>
+    <p id="final-message" style="margin-bottom: 120px;">Thank you for answering all questions.</p>
+    <button id="final-back-button" style="display:none;">Back</button>
+    <button id="end-button" style="display:none;">Finish</button>
+  </div>
+
   <header style="display:none;">
-    <h2>Auslan Fingerspelling Survey</h2>
-    <p>Please watch the video and answer the question below.</p>
+    <p id="header-text">Please watch the video and answer the question below.</p>
   </header>
 
   <div class="video-frame" style="display:none;">
@@ -161,84 +218,137 @@
         allowfullscreen>
       </iframe>
       <div id="video-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); color:#111; font-size:1.3em; display:flex; align-items:center; justify-content:center; z-index:2;">
-        You have reached the maximum of 3 plays for this video.
+        You have reached the maximum of playbacks for this video.
       </div>
     </div>
   </div>
 
   <div class="question-container" id="question-container" style="display:none;">
     <div class="question" id="question-text"></div>
-    <div id="options-container"></div>
-    <input type="text" id="text-answer" style="display: none;" placeholder="Type your answer here..." />
-    <button id="next-button">Next</button>
+    <div id="answer-wrapper"></div>
+    <div class="button-row">
+      <button id="back-button">Back</button>
+      <button id="next-button">Next</button>
+    </div>
   </div>
 
   <div class="progress-bar-container" style="display:none;">
-    <div class="progress-bar" id="progress-bar"></div>
+    <div class="progress-bar-bg"></div>
+    <div class="progress-bar-filled" id="progress-bar-filled"></div>
+    <div id="progress-circles" class="progress-circles"></div>
   </div>
 
   <div id="completion-message" style="display: none;">
-    🎉 Thank you for completing the survey! Your responses have been saved.
+    Thank you for completing the survey! Your responses have been saved.
   </div>
 
   <script>
-    const totalRounds = 30;
+    const totalRounds = 20;
     let currentRound = 0;
     const responses = [];
-
     const videoPlayCounts = Array(totalRounds).fill(0);
 
-    const videoIds = Array.from({ length: totalRounds }, (_, i) =>
-      ['760137731?h=789f74dbe5', '760137751?h=a402a746e6', '760137777?h=92fa26172b', '760137799?h=bdc1e4d649', '760137826?h=320b161496', '760137852?h=94badb1ee9', '760137885?h=d9c41737af', '760137908?h=0b79edb458', '760137937?h=7ee1a2285a', '760137950?h=3e347c6d20', '760137971?h=1d62e999f3', '760137998?h=2a00863b5b', '760138008?h=8ef1a2cad5', '760138027?h=0125bae0c4', '760138047?h=8f7f6ebb4d', '760138071?h=3bb457491f', '760138092?h=169c2376de', '760138109?h=7a5a94ca93', '760138132?h=c9db8310f1', '760138157?h=c95b94b0e2', '760141416?h=7b50a9f2cb', '760141440?h=e214495261', '760141462?h=08c6ff5297', '760141489?h=cc26610476', '760138188?h=284a72c899', '760138209?h=c70415231f', '760138231?h=bd989d248c', '760138254?h=6073e71a3f', '760137715?h=59d02ad1ac', '760123345?h=10d7cee8e5'][i % 3]
-    );
+    const videoIds = [
+      '759777670?h=08e2fc8f8e', '759786342?h=c609ac9bfe', '760109062?h=fa5c5f72cd',
+      '759789368?h=b36a89e75e', '760107949?h=efc49c6660', '759786708?h=5db74bf036',
+      '760108965?h=4632ea84df', '759787657?h=704e2fc937', '760124332?h=a3a90b5dfe',
+      '759787711?h=42f8d10e0c', '760137731?h=789f74dbe5', '760137885?h=d9c41737af',
+      '760138188?h=284a72c899', '760123421?h=8aca348f14', '759786874?h=e438b6b59d',
+      '760123357?h=408d12b363', '760123873?h=b4182f81cb', '759787684?h=78b08992d8',
+      '759788238?h=23a298fb3d', '759788411?h=017ca8c406'
+    ];
 
-    const questions = Array.from({ length: totalRounds }, () => {
-      return Math.random() > 0.5
-        ? {
-            type: 'multiple',
-            text: 'What is the sign in the video?',
-            options: ['apples', 'contend', 'frosty', 'geometry', 'gravy']
-          }
-        : {
-            type: 'text',
-            text: 'What is the sign in the video?'
-          };
+    const multipleChoiceOptions = [
+      ['accessibility', 'acceptable', 'asssesable', 'acceptance', 'accessible'],
+      ['transpose', 'transact', 'support', 'supported', 'transport'],
+      ['compete', 'contain', 'campaign', 'cuddles', 'complete'],
+      ['wealthy', 'health', 'healer', 'happily', 'healthy'],
+      ['barrow', 'marrow', 'mellow', 'below', 'narrow'],
+      ['modern', 'needle', 'middle', 'noodle', 'modest'],
+      ['regret', 'rugrat', 'unjust', 'reached', 'reject'],
+      ['nosey', 'moist', 'maybe', 'missy', 'noisy'],
+      ['spree', 'upset', 'spate', 'nosey', 'spray'],
+      ['hokey', 'heavy', 'money', 'funny', 'honey']
+    ];
+
+    const questions = Array.from({ length: totalRounds }, (_, i) => {
+      if (i % 2 === 0) {
+        return {
+          type: 'text',
+          text: 'What is fingerspelled in the video?'
+        };
+      } else {
+        return {
+          type: 'multiple',
+          text: 'What is fingerspelled in the video?',
+          options: multipleChoiceOptions[Math.floor(i / 2)] // Use specific options for each MC round
+        };
+      }
     });
 
     function loadRound(index) {
       const videoId = videoIds[index];
       const question = questions[index];
 
+      // Calculate remaining plays
+      const remainingPlays = Math.max(3 - videoPlayCounts[index], 0);
+
+      // Set question text
+      document.getElementById('question-text').textContent = question.text;
+
+      // Update question text with remaining plays
+      document.getElementById('header-text').innerHTML = `Please watch the video and answer the question below.<br>This video can be played <span style="font-weight:bold; color:#d00;">${remainingPlays}</span> time${remainingPlays === 1 ? '' : 's'}.`;
+
+      // Hide Back button on first round, show otherwise
+      const backBtn = document.getElementById('back-button');
+      const nextBtn = document.getElementById('next-button');
+      backBtn.style.display = (index === 0) ? 'none' : 'inline-block';
+
       document.getElementById('vimeo-player').src =
         'https://player.vimeo.com/video/' + videoId + '&controls=1&title=0&byline=0&portrait=0';
 
-      const questionText = document.getElementById('question-text');
-      const optionsContainer = document.getElementById('options-container');
-      const textInput = document.getElementById('text-answer');
+      const answerWrapper = document.getElementById('answer-wrapper');
+      answerWrapper.innerHTML = '';
 
-      questionText.textContent = question.text;
-      optionsContainer.innerHTML = '';
-      textInput.style.display = 'none';
-      textInput.value = '';
+      // Restore previous answer if exists
+      const prevResponse = responses[index];
 
       if (question.type === 'multiple') {
+        const flexDiv = document.createElement('div');
+        flexDiv.style.display = 'flex';
+        flexDiv.style.justifyContent = 'center';
+        flexDiv.style.alignItems = 'center';
+        flexDiv.style.gap = '16px';
         question.options.forEach(opt => {
           const btn = document.createElement('div');
           btn.className = 'option';
           btn.textContent = opt;
+          if (prevResponse && prevResponse.answer === opt) {
+            btn.classList.add('selected');
+          }
           btn.addEventListener('click', () => {
-            document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            flexDiv.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
             btn.classList.add('selected');
           });
-          optionsContainer.appendChild(btn);
+          flexDiv.appendChild(btn);
         });
+        answerWrapper.appendChild(flexDiv);
       } else {
-        textInput.style.display = 'inline-block';
+        const textInput = document.createElement('input');
+        textInput.type = 'text';
+        textInput.id = 'text-answer';
+        textInput.placeholder = 'Type your answer here...';
+        textInput.className = 'text-answer';
+        if (prevResponse && prevResponse.answer) {
+          textInput.value = prevResponse.answer;
+        }
+        answerWrapper.appendChild(textInput);
       }
 
       // Add play limit logic
       const iframe = document.getElementById('vimeo-player');
       const overlay = document.getElementById('video-overlay');
+      
       // Remove any previous event listener by replacing the iframe
       const newIframe = iframe.cloneNode(true);
       iframe.parentNode.replaceChild(newIframe, iframe);
@@ -248,6 +358,10 @@
 
       player.on('play', function() {
         videoPlayCounts[index]++;
+        // Update the question text with new play count
+        const remainingPlays = Math.max(3 - videoPlayCounts[index], 0);
+        document.getElementById('header-text').innerHTML = `Please watch the video and answer the question below.<br>This video can be played <span style="font-weight:bold; color:#d00;">${remainingPlays}</span> time${remainingPlays === 1 ? '' : 's'}.`
+
         if (videoPlayCounts[index] > 3) {
           player.pause();
           overlay.style.display = 'flex';
@@ -259,7 +373,50 @@
       overlay.style.display = 'none';
       newIframe.style.pointerEvents = 'auto';
       updateProgress();
+
+      if (backBtn) backBtn.blur();
+      if (nextBtn) nextBtn.blur();
     }
+
+    function showFinalPage() {
+      document.querySelector('header').style.display = 'none';
+      document.querySelector('.video-frame').style.display = 'none';
+      document.getElementById('question-container').style.display = 'none';
+      document.querySelector('.progress-bar-container').style.display = 'none';
+      document.getElementById('final-page').style.display = 'flex';
+
+      // Check if all questions are answered
+      const allAnswered = responses.filter(r => r && r.answer && r.answer.trim() !== '').length === totalRounds;
+
+      const finalHeading = document.getElementById('final-heading');
+      const finalMessage = document.getElementById('final-message');
+      const finalBackBtn = document.getElementById('final-back-button');
+      const endBtn = document.getElementById('end-button');
+ 
+      if (allAnswered) {
+        finalHeading.textContent = 'Survey Complete';
+        finalMessage.textContent = 'Thank you for answering all questions.';
+        endBtn.style.display = 'inline-block';
+        finalBackBtn.style.display = 'none';
+      } else {
+        finalHeading.textContent = 'Incomplete Survey';
+        finalMessage.textContent = 'Please answer all questions.';
+        endBtn.style.display = 'none';
+        finalBackBtn.style.display = 'inline-block';
+      }
+    }
+
+    // Final Back button handler
+    document.getElementById('final-back-button').addEventListener('click', function() {
+      document.getElementById('final-page').style.display = 'none';
+      document.querySelector('header').style.display = '';
+      document.querySelector('.video-frame').style.display = '';
+      document.getElementById('question-container').style.display = '';
+      document.querySelector('.progress-bar-container').style.display = '';
+      
+      currentRound = 0;
+      loadRound(currentRound);
+    });
 
     // Add Vimeo Player API script if not already present
     if (!document.getElementById('vimeo-api')) {
@@ -269,17 +426,16 @@
       document.body.appendChild(tag);
     }
 
-    document.getElementById('next-button').addEventListener('click', () => {
+    // Back button handler
+    document.getElementById('back-button').addEventListener('click', () => {
       const question = questions[currentRound];
       let answer = '';
 
       if (question.type === 'multiple') {
         const selected = document.querySelector('.option.selected');
-        if (!selected) return alert('Please select an answer.');
-        answer = selected.textContent;
+        answer = selected ? selected.textContent : '';
       } else {
         answer = document.getElementById('text-answer').value.trim();
-        if (!answer) return alert('Please enter a response.');
       }
 
       const response = {
@@ -290,25 +446,99 @@
         questionType: question.type,
         answer: answer
       };
-      responses.push(response);
+      responses[currentRound] = response;
+      submitToGoogleSheets(response);
+
+      if (currentRound > 0) {
+        currentRound--;
+        loadRound(currentRound);
+      }
+    });
+
+    // Next button handler
+    document.getElementById('next-button').addEventListener('click', () => {
+      const question = questions[currentRound];
+      let answer = '';
+
+      if (question.type === 'multiple') {
+        const selected = document.querySelector('.option.selected');
+        answer = selected ? selected.textContent : '';
+      } else {
+        answer = document.getElementById('text-answer').value.trim();
+      }
+
+      const response = {
+        name: userName,
+        email: userEmail,
+        round: currentRound + 1,
+        videoId: videoIds[currentRound],
+        questionType: question.type,
+        answer: answer
+      };
+      responses[currentRound] = response;
       submitToGoogleSheets(response);
 
       currentRound++;
 
       if (currentRound >= totalRounds) {
-        document.querySelector('header').style.display = 'none';
-        document.querySelector('.video-frame').style.display = 'none';
-        document.getElementById('question-container').style.display = 'none';
-        document.querySelector('.progress-bar-container').style.display = 'none';
-        document.getElementById('completion-message').style.display = 'block';
+        showFinalPage();
       } else {
         loadRound(currentRound);
       }
     });
 
+    // End button handler
+    document.getElementById('end-button').addEventListener('click', () => {
+      responses.forEach(response => submitToGoogleSheets(response));
+      document.getElementById('final-page').style.display = 'none';
+      document.getElementById('completion-message').style.display = 'block';
+    });
+
     function updateProgress() {
-      const percent = ((currentRound) / totalRounds) * 100;
-      document.getElementById('progress-bar').style.width = percent + '%';
+      const answeredCount = responses.filter(r => r && r.answer && r.answer.trim() !== '').length;
+      const percent = ((answeredCount - 1) / (totalRounds - 1)) * 100;
+      document.getElementById('progress-bar-filled').style.width = (answeredCount > 0 ? percent : 0) + '%';
+
+      // Update circles
+      const circlesContainer = document.getElementById('progress-circles');
+      circlesContainer.innerHTML = '';
+      for (let i = 0; i < totalRounds; i++) {
+        const circle = document.createElement('div');
+        circle.className = 'progress-circle';
+        if (responses[i] && responses[i].answer && responses[i].answer.trim() !== '') {
+          circle.classList.add('answered');
+        }
+        if (i === currentRound) {
+          circle.classList.add('current');
+        }
+        circle.title = `Question ${i + 1}`;
+        circle.addEventListener('click', () => {
+          const question = questions[currentRound];
+          let answer = '';
+
+          if (question.type === 'multiple') {
+            const selected = document.querySelector('.option.selected');
+            answer = selected ? selected.textContent : '';
+          } else {
+            answer = document.getElementById('text-answer').value.trim();
+          }
+
+          const response = {
+            name: userName,
+            email: userEmail,
+            round: currentRound + 1,
+            videoId: videoIds[currentRound],
+            questionType: question.type,
+            answer: answer
+          };
+          responses[currentRound] = response;
+          submitToGoogleSheets(response);
+
+          currentRound = i;
+          loadRound(currentRound);
+        });
+        circlesContainer.appendChild(circle);
+      }
     }
 
     function submitToGoogleSheets(response) {
@@ -325,6 +555,7 @@
     let userName = '';
     let userEmail = '';
 
+    // Start button handler
     document.getElementById('start-survey-button').addEventListener('click', () => {
       const name = document.getElementById('user-name').value.trim();
       const email = document.getElementById('user-email').value.trim();
@@ -337,9 +568,8 @@
       document.querySelector('.video-frame').style.display = '';
       document.getElementById('question-container').style.display = '';
       document.querySelector('.progress-bar-container').style.display = '';
-      loadRound(currentRound);
+      loadRound(0);
     });
-
   </script>
 </body>
 </html>
