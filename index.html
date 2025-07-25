@@ -8,8 +8,8 @@
     body {
       min-height: 100vh;
       font-family: sans-serif;
-      background-color: #fff;
-      color: #111;
+      background-color: #f1f1f1;
+      color: #333;
       margin: 0;
       padding: 0;
     }
@@ -24,7 +24,7 @@
       max-width: 800px;
       margin: 0 auto;
       padding: 16px;
-      background-color: #fff;
+      background-color: #f1f1f1;
       display: flex;
       justify-content: center;
     }
@@ -49,7 +49,7 @@
       padding: 10px 20px;
       min-width: 100px;
       background-color: #fff;
-      border: 2px solid #ccc;
+      border: 1px solid #ccc;
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
@@ -75,7 +75,7 @@
       margin-top: 30px;
       margin-bottom: 10px;
     }
-    #back-button, #final-back-button, #next-button, #start-survey-button, #end-button {
+    #back-button, #final-back-button, #next-button, #start-survey-button {
       padding: 12px 44px;
       background-color: #111;
       color: #fff;
@@ -85,7 +85,7 @@
       cursor: pointer;
       transition: background 0.2s, color 0.2s;
     }
-    #back-button:hover, #final-back-button:hover, #next-button:hover, #start-survey-button:hover, #end-button:hover {
+    #back-button:hover, #final-back-button:hover, #next-button:hover, #start-survey-button:hover {
       background: #fff;
       color: #111;
       border: 1px solid #111;
@@ -162,12 +162,6 @@
     .progress-circle.current {
       box-shadow: 0 0 2px 2px #111;
     }
-    #completion-message {
-      text-align: center;
-      margin-top: 50px;
-      font-size: 20px;
-      color: #111;
-    }
     #user-info-container, #final-page {
       display: flex;
       flex-direction: column;
@@ -184,6 +178,10 @@
       margin-bottom: 24px;
       min-height: 56px;
     }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -198,8 +196,10 @@
   <div id="final-page" style="display:none;">
     <h2 id="final-heading">Survey Complete</h2>
     <p id="final-message" style="margin-bottom: 120px;">Thank you for answering all questions.</p>
+    <div id="spinner" style="margin-top: 20px;">
+      <div style="border: 6px solid #e3e3e3; border-top: 6px solid #000000; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+    </div>
     <button id="final-back-button" style="display:none;">Back</button>
-    <button id="end-button" style="display:none;">Finish</button>
   </div>
 
   <header style="display:none;">
@@ -238,14 +238,13 @@
     <div id="progress-circles" class="progress-circles"></div>
   </div>
 
-  <div id="completion-message" style="display: none;">
-    Thank you for completing the survey! Your responses have been saved.
-  </div>
-
   <script>
-    const totalRounds = 20;
     let currentRound = 0;
+    let userName = '';
+    let userEmail = '';
+    
     const responses = [];
+    const totalRounds = 20;
     const videoPlayCounts = Array(totalRounds).fill(0);
 
     const videoIds = [
@@ -255,36 +254,44 @@
       '759787711?h=42f8d10e0c', '760137731?h=789f74dbe5', '760137885?h=d9c41737af',
       '760138188?h=284a72c899', '760123421?h=8aca348f14', '759786874?h=e438b6b59d',
       '760123357?h=408d12b363', '760123873?h=b4182f81cb', '759787684?h=78b08992d8',
-      '759788238?h=23a298fb3d', '759788411?h=017ca8c406'
+      '759787579?h=16bfd8d842', '759788411?h=017ca8c406'
     ];
 
     const multipleChoiceOptions = [
-      ['accessibility', 'acceptable', 'asssesable', 'acceptance', 'accessible'],
-      ['transpose', 'transact', 'support', 'supported', 'transport'],
-      ['compete', 'contain', 'campaign', 'cuddles', 'complete'],
-      ['wealthy', 'health', 'healer', 'happily', 'healthy'],
-      ['barrow', 'marrow', 'mellow', 'below', 'narrow'],
-      ['modern', 'needle', 'middle', 'noodle', 'modest'],
-      ['regret', 'rugrat', 'unjust', 'reached', 'reject'],
-      ['nosey', 'moist', 'maybe', 'missy', 'noisy'],
-      ['spree', 'upset', 'spate', 'nosey', 'spray'],
-      ['hokey', 'heavy', 'money', 'funny', 'honey']
+      ['acceptable', 'asssesable', 'accessibility', 'accessible', 'acceptance'],
+      ['transpose', 'supported', 'support', 'transact', 'transport'],
+      ['complete', 'campaign', 'cuddles', 'contain', 'compete'],
+      ['health', 'healthy', 'healer', 'happily', 'wealthy'],
+      ['marrow', 'mellow', 'narrow', 'barrow', 'below'],
+      ['middle', 'modest', 'noodle', 'needle', 'modern'],
+      ['reached', 'regret', 'reject', 'unjust', 'rugrat'],
+      ['moist', 'missy', 'noisy', 'nosey', 'maybe'],
+      ['nosey', 'spate', 'upset', 'spree', 'spray'],
+      ['heavy', 'hokey', 'honey', 'funny', 'money']
     ];
 
     const questions = Array.from({ length: totalRounds }, (_, i) => {
       if (i % 2 === 0) {
         return {
           type: 'text',
-          text: 'What is fingerspelled in the video?'
+          text: 'What is fingerspelled in the video? Write down any letters that you catch, even if you don\'t get the whole word.'
         };
       } else {
         return {
           type: 'multiple',
           text: 'What is fingerspelled in the video?',
-          options: multipleChoiceOptions[Math.floor(i / 2)] // Use specific options for each MC round
+          options: multipleChoiceOptions[Math.floor(i / 2)]
         };
       }
     });
+
+    // Vimeo Player API script
+    if (!document.getElementById('vimeo-api')) {
+      const tag = document.createElement('script');
+      tag.src = "https://player.vimeo.com/api/player.js";
+      tag.id = "vimeo-api";
+      document.body.appendChild(tag);
+    }
 
     function loadRound(index) {
       const videoId = videoIds[index];
@@ -304,8 +311,7 @@
       const nextBtn = document.getElementById('next-button');
       backBtn.style.display = (index === 0) ? 'none' : 'inline-block';
 
-      document.getElementById('vimeo-player').src =
-        'https://player.vimeo.com/video/' + videoId + '&controls=1&title=0&byline=0&portrait=0';
+      document.getElementById('vimeo-player').src = 'https://player.vimeo.com/video/' + videoId + '&controls=1&title=0&byline=0&portrait=0';
 
       const answerWrapper = document.getElementById('answer-wrapper');
       answerWrapper.innerHTML = '';
@@ -390,116 +396,28 @@
 
       const finalHeading = document.getElementById('final-heading');
       const finalMessage = document.getElementById('final-message');
+      const spinner = document.getElementById('spinner');
       const finalBackBtn = document.getElementById('final-back-button');
-      const endBtn = document.getElementById('end-button');
  
       if (allAnswered) {
         finalHeading.textContent = 'Survey Complete';
         finalMessage.textContent = 'Thank you for answering all questions.';
-        endBtn.style.display = 'inline-block';
+        spinner.style.display = 'inline-block';
         finalBackBtn.style.display = 'none';
+        submitToGoogleSheets(responses)
       } else {
         finalHeading.textContent = 'Incomplete Survey';
         finalMessage.textContent = 'Please answer all questions.';
-        endBtn.style.display = 'none';
         finalBackBtn.style.display = 'inline-block';
+        spinner.style.display = 'none';
       }
     }
-
-    // Final Back button handler
-    document.getElementById('final-back-button').addEventListener('click', function() {
-      document.getElementById('final-page').style.display = 'none';
-      document.querySelector('header').style.display = '';
-      document.querySelector('.video-frame').style.display = '';
-      document.getElementById('question-container').style.display = '';
-      document.querySelector('.progress-bar-container').style.display = '';
-      
-      currentRound = 0;
-      loadRound(currentRound);
-    });
-
-    // Add Vimeo Player API script if not already present
-    if (!document.getElementById('vimeo-api')) {
-      const tag = document.createElement('script');
-      tag.src = "https://player.vimeo.com/api/player.js";
-      tag.id = "vimeo-api";
-      document.body.appendChild(tag);
-    }
-
-    // Back button handler
-    document.getElementById('back-button').addEventListener('click', () => {
-      const question = questions[currentRound];
-      let answer = '';
-
-      if (question.type === 'multiple') {
-        const selected = document.querySelector('.option.selected');
-        answer = selected ? selected.textContent : '';
-      } else {
-        answer = document.getElementById('text-answer').value.trim();
-      }
-
-      const response = {
-        name: userName,
-        email: userEmail,
-        round: currentRound + 1,
-        videoId: videoIds[currentRound],
-        questionType: question.type,
-        answer: answer
-      };
-      responses[currentRound] = response;
-      submitToGoogleSheets(response);
-
-      if (currentRound > 0) {
-        currentRound--;
-        loadRound(currentRound);
-      }
-    });
-
-    // Next button handler
-    document.getElementById('next-button').addEventListener('click', () => {
-      const question = questions[currentRound];
-      let answer = '';
-
-      if (question.type === 'multiple') {
-        const selected = document.querySelector('.option.selected');
-        answer = selected ? selected.textContent : '';
-      } else {
-        answer = document.getElementById('text-answer').value.trim();
-      }
-
-      const response = {
-        name: userName,
-        email: userEmail,
-        round: currentRound + 1,
-        videoId: videoIds[currentRound],
-        questionType: question.type,
-        answer: answer
-      };
-      responses[currentRound] = response;
-      submitToGoogleSheets(response);
-
-      currentRound++;
-
-      if (currentRound >= totalRounds) {
-        showFinalPage();
-      } else {
-        loadRound(currentRound);
-      }
-    });
-
-    // End button handler
-    document.getElementById('end-button').addEventListener('click', () => {
-      responses.forEach(response => submitToGoogleSheets(response));
-      document.getElementById('final-page').style.display = 'none';
-      document.getElementById('completion-message').style.display = 'block';
-    });
 
     function updateProgress() {
       const answeredCount = responses.filter(r => r && r.answer && r.answer.trim() !== '').length;
       const percent = ((answeredCount - 1) / (totalRounds - 1)) * 100;
       document.getElementById('progress-bar-filled').style.width = (answeredCount > 0 ? percent : 0) + '%';
 
-      // Update circles
       const circlesContainer = document.getElementById('progress-circles');
       circlesContainer.innerHTML = '';
       for (let i = 0; i < totalRounds; i++) {
@@ -532,7 +450,6 @@
             answer: answer
           };
           responses[currentRound] = response;
-          submitToGoogleSheets(response);
 
           currentRound = i;
           loadRound(currentRound);
@@ -541,19 +458,22 @@
       }
     }
 
-    function submitToGoogleSheets(response) {
-      fetch('YOUR_GOOGLE_SCRIPT_URL', {
+    function submitToGoogleSheets(responses) {
+      fetch('https://script.google.com/macros/s/AKfycbyEBfySgZO0rU0hqAhXysAKNevsUfEUHg6Cz8ZQrzdha_MC0A8BJYjtHDjp80TB5oE0/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(response)
+        body: JSON.stringify(responses)
+      }).then(() => {
+        document.getElementById('final-message').textContent = 'Responses successfully saved.';
+        document.getElementById('spinner').style.visibility = 'hidden';
+      }).catch(error => {
+        document.getElementById('final-message').textContent = 'Error saving responses. Please try again later.';
+        document.getElementById('spinner').style.visibility = 'hidden';
       });
     }
-
-    let userName = '';
-    let userEmail = '';
 
     // Start button handler
     document.getElementById('start-survey-button').addEventListener('click', () => {
@@ -569,6 +489,77 @@
       document.getElementById('question-container').style.display = '';
       document.querySelector('.progress-bar-container').style.display = '';
       loadRound(0);
+    });
+
+    // Next button handler
+    document.getElementById('next-button').addEventListener('click', () => {
+      const question = questions[currentRound];
+      let answer = '';
+
+      if (question.type === 'multiple') {
+        const selected = document.querySelector('.option.selected');
+        answer = selected ? selected.textContent : '';
+      } else {
+        answer = document.getElementById('text-answer').value.trim();
+      }
+
+      const response = {
+        name: userName,
+        email: userEmail,
+        round: currentRound + 1,
+        videoId: videoIds[currentRound],
+        questionType: question.type,
+        answer: answer
+      };
+      responses[currentRound] = response;
+
+      currentRound++;
+
+      if (currentRound >= totalRounds) {
+        showFinalPage();
+      } else {
+        loadRound(currentRound);
+      }
+    });
+
+    // Back button handler
+    document.getElementById('back-button').addEventListener('click', () => {
+      const question = questions[currentRound];
+      let answer = '';
+
+      if (question.type === 'multiple') {
+        const selected = document.querySelector('.option.selected');
+        answer = selected ? selected.textContent : '';
+      } else {
+        answer = document.getElementById('text-answer').value.trim();
+      }
+
+      const response = {
+        name: userName,
+        email: userEmail,
+        round: currentRound + 1,
+        videoId: videoIds[currentRound],
+        questionType: question.type,
+        answer: answer
+      };
+      responses[currentRound] = response;
+
+      if (currentRound > 0) {
+        currentRound--;
+        loadRound(currentRound);
+      }
+    });
+
+    // Final Back button handler
+    document.getElementById('final-back-button').addEventListener('click', function() {
+      document.getElementById('final-page').style.display = 'none';
+      document.querySelector('header').style.display = '';
+      document.querySelector('.video-frame').style.display = '';
+      document.getElementById('question-container').style.display = '';
+      document.querySelector('.progress-bar-container').style.display = '';
+      
+      currentRound = 0;
+      loadRound(currentRound);
     });
   </script>
 </body>
